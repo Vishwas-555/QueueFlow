@@ -1,0 +1,11 @@
+const express=require("express")
+const router=express.Router()
+const {getAllServices,getServiceById,createService,updateService,deactivateService}=require("../controllers/serviceController")
+const authMiddleware = require("../middleware/authMiddleware")
+const adminMiddleware=require("../middleware/adminMiddleware")
+router.get("/",getAllServices)
+router.get("/:id",getServiceById)
+router.post("/",authMiddleware,adminMiddleware,createService)
+router.put("/:id",authMiddleware,adminMiddleware,updateService)
+router.delete("/:id",authMiddleware,adminMiddleware,deactivateService)
+module.exports=router
