@@ -2,6 +2,7 @@
 import { useState, useEffect ,useCallback } from 'react'
 import { useParams, useNavigate } from 'react-router'
 import socket from '../socket'
+import API_URL from '../config'
 
 function AdminQueueManagement() {
   const { sessionId } = useParams()
@@ -31,7 +32,7 @@ function AdminQueueManagement() {
     try {
       const token = localStorage.getItem('token')
       const response = await fetch(
-        `http://localhost:5000/api/v1/queues/admin/${sessionId}`,
+        `${API_URL}/api/v1/queues/admin/${sessionId}`,
         {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -85,7 +86,7 @@ function AdminQueueManagement() {
         setQueueActionError('')
         const token = localStorage.getItem('token')
         const response = await fetch(
-        `http://localhost:5000/api/v1/queues/admin/${sessionId}/next`,
+        `${API_URL}/api/v1/queues/admin/${sessionId}/next`,
         {
             method: 'POST',
             headers: {
@@ -119,7 +120,7 @@ const handleCustomerAction = async (entryId, status) => {
     const token = localStorage.getItem('token')
 
       const response = await fetch(
-        `http://localhost:5000/api/v1/queues/admin/entries/${entryId}/status`,
+        `${API_URL}/api/v1/queues/admin/entries/${entryId}/status`,
         {
           method: 'PATCH',
           headers: {
@@ -161,7 +162,7 @@ const handleCustomerAction = async (entryId, status) => {
           currentPriority === selectedPriority ? 0 : selectedPriority
 
         const response = await fetch(
-          `http://localhost:5000/api/v1/queues/admin/entries/${entryId}/priority`,
+          `${API_URL}/api/v1/queues/admin/entries/${entryId}/priority`,
           {
             method: 'PATCH',
             headers: {
@@ -193,7 +194,7 @@ const handleCustomerAction = async (entryId, status) => {
         setQueueActionError('')
         const token = localStorage.getItem('token')
         const response = await fetch(
-          `http://localhost:5000/api/v1/queues/admin/${sessionId}/close`,
+          `${API_URL}/api/v1/queues/admin/${sessionId}/close`,
           {
             method: 'PATCH',
             headers: {

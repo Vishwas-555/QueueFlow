@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import API_URL from '../config'
 function Login() {
   const [formData, setFormData] = useState({
     email: '',
@@ -21,7 +22,7 @@ function Login() {
 
     try {
       const response = await fetch(
-        'http://localhost:5000/api/v1/auth/login',
+        `${API_URL}/api/v1/auth/login`,
         {
           method: 'POST',
           headers: {

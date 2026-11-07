@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import {useNavigate} from "react-router"
 import socket from '../socket'
-
+import API_URL from '../config'
 function CustomerDashboard() {
   const [services, setServices] = useState([])
   const [isLoading, setIsLoading] = useState(true)
@@ -35,7 +35,7 @@ function CustomerDashboard() {
 
     async function fetchServices() {
       try {
-        const response = await fetch('http://localhost:5000/api/v1/services')
+        const response = await fetch(`${API_URL}/api/v1/services`)
         const result = await response.json()
 
         if (!response.ok) {
@@ -62,7 +62,7 @@ function CustomerDashboard() {
         }
 
         const response = await fetch(
-          'http://localhost:5000/api/v1/queues/my-status',
+          `${API_URL}/api/v1/queues/my-status`,
           {
             headers: {
               Authorization: `Bearer ${token}`,
@@ -148,7 +148,7 @@ function CustomerDashboard() {
   async function fetchActiveQueueCount() {
     try {
       const response = await fetch(
-        'http://localhost:5000/api/v1/queues/active-count'
+        `${API_URL}/api/v1/queues/active-count`
       )
 
       const result = await response.json()
@@ -195,7 +195,7 @@ function CustomerDashboard() {
       }
 
       const response = await fetch(
-        'http://localhost:5000/api/v1/queues/join',
+        `${API_URL}/api/v1/queues/join`,
         {
           method: 'POST',
           headers: {
@@ -256,7 +256,7 @@ function CustomerDashboard() {
       }
 
       const response = await fetch(
-        `http://localhost:5000/api/v1/queues/my-entry/${entryId}/cancel`,
+        `${API_URL}/api/v1/queues/my-entry/${entryId}/cancel`,
         {
           method: 'PATCH',
           headers: {

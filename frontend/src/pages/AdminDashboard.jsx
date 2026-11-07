@@ -1,6 +1,7 @@
 import { useState,useEffect } from "react";
 import {useNavigate} from "react-router"
 import socket from "../socket"
+import API_URL from '../config'
 
 
 function AdminDashboard(){
@@ -61,7 +62,7 @@ const fetchDashboardData = async () => {
   try {
     const results = await Promise.allSettled([
 
-      fetch('http://localhost:5000/api/v1/services')
+      fetch(`${API_URL}/api/v1/services`)
         .then(async (response) => {
           const result = await response.json()
           if (!response.ok || !result.success) {
@@ -70,7 +71,7 @@ const fetchDashboardData = async () => {
           return result.data
         }),
 
-        fetch('http://localhost:5000/api/v1/queues/active-count')
+        fetch(`${API_URL}/api/v1/queues/active-count`)
         .then(async (response) => {
           const result = await response.json()
           if (!response.ok || !result.success) {
@@ -78,7 +79,7 @@ const fetchDashboardData = async () => {
           }
           return result.data.active_queues
         }),
-      fetch('http://localhost:5000/api/v1/queues/admin/active-sessions', {
+      fetch(`${API_URL}/api/v1/queues/admin/active-sessions`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -156,7 +157,7 @@ const fetchDashboardData = async () => {
         const isEditing=editingService!==null
         setIsCreating(true)
         const response = await fetch(
-          isEditing? `http://localhost:5000/api/v1/services/${editingService.id}` : 'http://localhost:5000/api/v1/services',{
+          isEditing? `${API_URL}/api/v1/services/${editingService.id}` : `${API_URL}/api/v1/services`,{
             method: isEditing? 'PUT' :  'POST',
             headers:{
               'Content-Type':'application/json',
@@ -195,7 +196,7 @@ const fetchDashboardData = async () => {
         setDeactivatingServiceId(service.id)
         setActionError('')
         const response = await fetch(
-          `http://localhost:5000/api/v1/services/${service.id}`,
+          `${API_URL}/api/v1/services/${service.id}`,
           {
             method: 'DELETE',
             headers: {
@@ -221,7 +222,7 @@ const fetchDashboardData = async () => {
         setQueueActionError('')
 
         const response = await fetch(
-          `http://localhost:5000/api/v1/queues/admin/${service.id}/start`,
+          `${API_URL}/api/v1/queues/admin/${service.id}/start`,
           {
             method: 'POST',
             headers: {

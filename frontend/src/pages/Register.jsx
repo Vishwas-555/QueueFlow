@@ -1,5 +1,5 @@
 import { useState } from "react"
-
+import API_URL from '../config'
 function Register() {
   const [formData,setFormData]= useState({
     name:'',
@@ -31,7 +31,7 @@ function Register() {
     setIsLoading(true)
     try{
       const response=await fetch(
-        'http://localhost:5000/api/v1/auth/register',
+        `${API_URL}/api/v1/auth/register`,
         {
           method:'POST',
           headers:{
