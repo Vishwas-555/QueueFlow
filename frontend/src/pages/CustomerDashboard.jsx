@@ -144,6 +144,15 @@ function CustomerDashboard() {
     } catch (error) {
       console.error('Fetch Active Queue Count Error:', error)
     }
+      function handleQueueSessionStarted() {
+    fetchActiveQueueCount()
+  }
+
+  socket.on('queue-session-started', handleQueueSessionStarted)
+
+  return () => {
+    socket.off('queue-session-started', handleQueueSessionStarted)
+  }
   }
 
   fetchActiveQueueCount()

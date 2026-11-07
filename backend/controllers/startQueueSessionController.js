@@ -43,6 +43,14 @@ async function startQueueSession(req, res) {
         returning  id, service_id, status, started_at, ended_at`,[serviceId])
     await client.query("COMMIT")
     transactionStarted = false
+
+    const io = req.app.get("io")
+
+    io.emit("queue-session-started", {
+        sessionId: sessionResult.rows[0].id,
+        serviceId: sessionResult.rows[0].service_id
+    })
+
     return res.status(201).json({
     success: true,
     message: "Queue Session Started Successfully",
