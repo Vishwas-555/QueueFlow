@@ -276,13 +276,21 @@ const fetchDashboardData = async () => {
 
             <main className="mx-auto max-w-7xl px-6 py-8">
             <section className="mb-8">
-                <p className="mb-2 text-sm font-semibold uppercase tracking-wider text-blue-600">
+                <p className="mb-2 text-xl font-semibold uppercase tracking-wider text-blue-600">
                 Admin Overview
                 </p>
-
-                <h2 className="text-3xl font-bold tracking-tight text-slate-900">
-                Welcome back{user?.name ? `, ${user.name}` : ''}
-                </h2>
+                <div className="flex justify-between">
+                  <h2 className="text-3xl font-bold tracking-tight text-slate-900">
+                    Welcome, {user?.name ? ` ${user.name}` : ''}!
+                    </h2>
+                  <button
+                    onClick={() => window.location.reload()}
+                    className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition"
+                  >
+                    ↻ Refresh
+                  </button>
+                </div>
+                
 
                 <p className="mt-2 text-slate-600">
                 Manage your services and monitor queue activity from one place.

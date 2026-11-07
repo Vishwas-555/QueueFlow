@@ -13,8 +13,13 @@ async function closeQueueSession(req, res) {
     client = await pool.connect()
     await client.query("BEGIN")
     transactionStarted = true
-    const sessionResult=await client.query(`select id,service_id,status from queue_sessions 
-        where id=$1 and status='ACTIVE' for update`,[sessionId])
+    const sessionResult = await client.query(`
+    SELECT qs.id, qs.service_id, qs.status, s.name AS service_name
+    FROM queue_sessions qs
+    JOIN services s ON qs.service_id = s.id
+    WHERE qs.id = $1 AND qs.status = 'ACTIVE'
+    FOR UPDATE OF qs
+    `, [sessionId])
     if (sessionResult.rows.length === 0) {
     await client.query("ROLLBACK")
     transactionStarted = false
@@ -46,7 +51,7 @@ async function closeQueueSession(req, res) {
         await client.query("COMMIT")
     transactionStarted = false
     const io = req.app.get("io")
-    io.to(`queue:${sessionId}`).emit("queue-session-closed", {sessionId})
+    io.to(`queue:${sessionId}`).emit("queue-session-closed", {sessionId,serviceName: sessionResult.rows[0].service_name})
     return res.status(200).json({
         success: true,
         message: "Queue Session Closed Successfully",

@@ -13,8 +13,25 @@ function CustomerDashboard() {
   const [activeQueueCount, setActiveQueueCount] = useState(0)
   const [cancellingEntryId, setCancellingEntryId] = useState(null)
   const [queueClosedMessage, setQueueClosedMessage] = useState('')
+  const [username, setUser] = useState(null)
   const navigate=useNavigate()
+  const token = localStorage.getItem('token')
+  const storedUser = localStorage.getItem('user')
+
   useEffect(() => {
+  if (!token || !storedUser) {
+    navigate('/login')
+    return
+  }
+
+  try {
+    const parsedUser = JSON.parse(storedUser)
+    setUser(parsedUser)
+  } catch {
+    localStorage.removeItem('user')
+    navigate('/login')
+  }
+}, [navigate, token, storedUser])
 
     async function fetchServices() {
       try {
@@ -31,7 +48,7 @@ function CustomerDashboard() {
         setIsLoading(false)
       }
     }
-
+    useEffect(() => {
     fetchServices()
   }, [])
 
@@ -92,7 +109,7 @@ function CustomerDashboard() {
     useEffect(() => {
     function handleQueueClosed(data) {
       setQueueClosedMessage(
-        `Queue session #${data.sessionId} has been closed by the administrator.`
+        `Queue session #${data.serviceName} has been closed by the administrator.`
       )
       fetchMyQueueStatus()
     }
@@ -127,7 +144,7 @@ function CustomerDashboard() {
       }
     }, [])
 
-  useEffect(() => {
+
   async function fetchActiveQueueCount() {
     try {
       const response = await fetch(
@@ -144,19 +161,27 @@ function CustomerDashboard() {
     } catch (error) {
       console.error('Fetch Active Queue Count Error:', error)
     }
-      function handleQueueSessionStarted() {
+
+  }
+  useEffect(() => {
+  function handleQueueSessionStarted() {
     fetchActiveQueueCount()
+    fetchServices()
+  }
+
+  function handleQueueSessionClosed() {
+    fetchActiveQueueCount()
+    fetchServices()
   }
 
   socket.on('queue-session-started', handleQueueSessionStarted)
-
+  socket.on('queue-session-closed', handleQueueSessionClosed)
+  fetchActiveQueueCount()
   return () => {
     socket.off('queue-session-started', handleQueueSessionStarted)
+    socket.off('queue-session-closed', handleQueueSessionClosed)
   }
-  }
-
-  fetchActiveQueueCount()
-  }, [])
+}, [])
 
   async function handleJoinQueue(serviceId) {
     setJoiningServiceId(serviceId)
@@ -284,16 +309,24 @@ function CustomerDashboard() {
       </header>
 
       <section className="mx-auto max-w-7xl px-6 py-8">
-        <h1 className="text-3xl font-bold text-slate-900">
-          Welcome Back!
-        </h1>
+        <div className="flex justify-between">
+                  <h1 className="text-3xl font-bold text-slate-900">
+                      Welcome, {username?.name || 'Customer'}!
+                    </h1>
+                  <button
+                    onClick={() => window.location.reload()}
+                    className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition"
+                  >
+                    ↻ Refresh
+                  </button>
+                </div>
 
         <p className="mt-2 text-slate-600">
           Manage your queues and track your waiting time.
         </p>
       </section>
 
-      {/* Summary Cards */}
+      
       <section className="mx-auto max-w-7xl px-6 pb-8">
         <div className="grid gap-4 sm:grid-cols-2">
           <div className="rounded-xl border border-slate-200 bg-white p-5">
@@ -310,7 +343,7 @@ function CustomerDashboard() {
         </div>
       </section>
 
-      {/* Available Services */}
+      
       <section className="mx-auto max-w-7xl px-6 pb-8">
         <h2 className="text-2xl font-bold text-slate-900">
           Available Services
@@ -332,32 +365,35 @@ function CustomerDashboard() {
           </p>
         )}
 
-        {!isLoading &&
-          !error &&
-          services.map((service) => (
-            <div
-              key={service.id}
-              className="mt-6 rounded-xl border border-slate-200 bg-white p-6 shadow-sm"
-            >
-              <h3 className="text-xl font-semibold text-slate-900">
-                {service.name}
-              </h3>
-
-              <p className="mt-2 text-slate-600">
-                {service.description}
-              </p>
-
-              <button
-                onClick={() => handleJoinQueue(service.id)}
-                disabled={joiningServiceId !== null}
-                className="mt-4 rounded-lg bg-blue-600 px-5 py-2 text-white transition hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-50"
+      {!isLoading &&
+        !error && (
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-4">
+            {services.map((service) => (
+              <div
+                key={service.id}
+                className="mt-6 rounded-xl border border-slate-200 bg-white p-6 shadow-sm"
               >
-                {joiningServiceId === service.id
-                  ? 'Joining...'
-                  : 'Join Queue'}
-              </button>
-            </div>
-          ))}
+                <h3 className="text-xl font-semibold text-slate-900">
+                  {service.name}
+                </h3>
+
+                <p className="mt-2 text-slate-600">
+                  {service.description}
+                </p>
+
+                <button
+                  onClick={() => handleJoinQueue(service.id)}
+                  disabled={joiningServiceId !== null}
+                  className="mt-4 rounded-lg bg-blue-600 px-5 py-2 text-white transition hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-50"
+                >
+                  {joiningServiceId === service.id
+                    ? 'Joining...'
+                    : 'Join Queue'}
+                </button>
+              </div>
+            ))}
+          </div>
+        )}
 
         {queueMessage && (
           <p className="mt-4 rounded-lg bg-blue-50 font-bold p-4 text-slate-800">
@@ -371,9 +407,9 @@ function CustomerDashboard() {
       )}
       </section>
 
-      {/* My Active Queues */}
+      
       <section className="mx-auto max-w-7xl px-6 pb-8">
-        <h2 className="text-2xl font-bold text-slate-900">
+        <h2 className="text-2xl font-bold text-slate-900 mb-2">
           My Active Queues
         </h2>
 
@@ -382,29 +418,40 @@ function CustomerDashboard() {
             <p className="text-slate-600">{queueStatusError}</p>
           </div>
         ) : activeQueues.length > 0 ? (
-          activeQueues.map((queue) => (
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-4">
+          {activeQueues.map((queue) => (
             <div
               key={queue.id}
               className="mt-4 rounded-xl border border-slate-200 bg-white p-6"
             >
-              <h3 className="text-xl font-semibold text-slate-900">
+              <h3 className="text-2xl font-bold text-slate-900 text-center ">
                 {queue.service_name}
               </h3>
-
-              <p className="mt-3 text-slate-600">
-                Ticket Number: #{queue.ticket_number}
+              <hr className="border-t border-gray-600 my-3" />
+              
+              <p className="mt-6 text-xl text-slate-900 flex items-center gap-2">
+                <span>Position:</span> 
+                <span className="text-black text-xl font-bold">{queue.position}</span> 
               </p>
 
-              <p className="mt-2 text-slate-600">
-                Position: {queue.position}
-              </p>
-
-              <p className="mt-2 text-slate-600">
+              <p className="mt-2 text-xl text-slate-900">
                 Estimated Wait: {queue.estimated_wait_minutes} minutes
               </p>
 
+              <p className="mt-2 text-xl text-slate-900">
+                Status: <span
+                className={`px-2.5 py-1 text-xs rounded-full ${
+                  queue.status.toLowerCase() === 'serving'
+                    ? 'bg-green-100 text-green-700 border border-green-300'
+                    : 'bg-red-100 text-red-700 border border-red-300'
+                }`}
+              >
+                {queue.status}
+              </span>
+              </p>
+
               <p className="mt-2 text-slate-600">
-                Status: {queue.status}
+                Ticket Number: #{queue.ticket_number}
               </p>
               {queue.status === 'WAITING' && (
                 <button
@@ -418,7 +465,8 @@ function CustomerDashboard() {
                 </button>
               )}
             </div>
-          ))
+          ))}
+        </div>
         ) : (
           <div className="mt-4 rounded-xl border border-slate-200 bg-white p-6">
             <p className="text-slate-600">

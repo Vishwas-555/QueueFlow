@@ -12,12 +12,7 @@ function Home() {
           <a href="#how-it-works" className="hover:text-blue-600 transition">
             How it Works 
           </a>
-        <a href="/register" className="bg-blue-600 text-white px-5 py-2 rounded-lg hover:bg-blue-700 transition"  >
-          Register
-        </a>
-        <a href="/login" className="text-white bg-slate-600 hover:bg-slate-700 transition px-5 py-2 rounded-lg">
-          Login
-        </a>
+       
         </div>
       </nav>
 
@@ -36,11 +31,11 @@ function Home() {
         it's your turn. Less waiting, more living.
       </p>
       <div className="flex sm:flex-row items-center gap-4 justify-center mt-6">
-        <a href="#" className="bg-blue-600 px-6 py-3 rounded-lg font-semibold text-white hover:bg-blue-700 transition">
-        Join a Queue
+        <a href="/login" className="bg-blue-600 px-6 py-3 rounded-lg font-semibold text-white hover:bg-blue-700 transition">
+        Login
         </a>
-        <a href="#features" className="bg-slate-600 px-6 py-3 rounded-lg font-semibold text-white hover:bg-slate-700 transition">
-        Explore Features
+        <a href="/register" className="bg-slate-600 px-6 py-3 rounded-lg font-semibold text-white hover:bg-slate-700 transition">
+        Register
         </a>
       </div>
       </section>
